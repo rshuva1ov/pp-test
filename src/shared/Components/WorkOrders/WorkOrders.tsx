@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import { axiosPostWorkOrder } from '../../API/newWorkOrderAPI';
 import { axiosGetNomenclature } from '../../API/nomenclatureAPI';
 import { axiosGetWorkOrders } from '../../API/workOrdersAPI';
+import { axiosPutWorkOrderWithId } from '../../API/workOrdersIdAPI';
 import { NomenclatureInterface, WorkOrder, changeWorkOrderInterface, newWorkOrderInterface, tokenInterface } from '../Main';
 import styles from './workorders.css';
-import { axiosPutWorkOrderWithId } from '../../API/workOrdersIdAPI';
 
 export function WorkOrders(token: tokenInterface) {
   const TOKEN = token['token'];
@@ -274,13 +274,18 @@ export function WorkOrders(token: tokenInterface) {
     number: '',
     start_date: '',
     material: {
-      name: ''
+      id: 1,
+      code: '',
+      name: '',
     },
     product: {
-      name: ''
+      id: 1,
+      code: '',
+      name: '',
     },
     is_finished: false
   });
+  const [workOrderId, setWorkOrderId] = useState(1);
 
   const WorkOrdersEditForm = (props: WorkOrdersFormInterface) => {
     const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
@@ -325,32 +330,29 @@ export function WorkOrders(token: tokenInterface) {
       number: '',
       start_date: '',
       material: {
+        id: 1,
+        code: '',
         name: '',
       },
       product: {
+        id: 1,
+        code: '',
         name: '',
       },
       is_finished: false
     });
 
     const changedWorkOrderInfoAsync = async () => {
-      const isEmptyField = Object.values(changedWorkOrderInfo).some((value) => value === '');
-      const id = changedWorkOrderInfo.id;
-
-      if (isEmptyField) {
-        alert('Пожалуйста, заполните все поля формы.');
-        return;
-      }
+      
       const confirmation = confirm('Вы уверены, что хотите внести изменения?');
       if (confirmation) {
         console.log(changedWorkOrderInfo);
-
-        const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, id);
+        const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, workOrderIdInfo.id);
         console.log(response);
 
         if (response) {
           fetchWorkorders();
-          props.onClose?.()
+          props.onClose?.();
         }
       } else return;
     };
@@ -386,9 +388,13 @@ export function WorkOrders(token: tokenInterface) {
           <span>Название материала</span>
           <select
             className={styles.input}
-            defaultValue={workOrderIdInfo.material.name}
-            onChange={(e) => setChangedWorkOrderInfo({ ...workOrderIdInfo, material: { ...workOrderIdInfo.material, name: e.target.value } })}
+            value={workOrderIdInfo.material.name}
+            onChange={(e) => {
+              setChangedWorkOrderInfo({ ...workOrderIdInfo, material: { ...workOrderIdInfo.material, name: e.target.value } })
+            }
+            }
           >
+            <option value={workOrderIdInfo.material.name}>{workOrderIdInfo.material.name}</option>
             {materials.map((material) => (
               <option key={material.id} value={material.id}>
                 {material.name}
@@ -398,9 +404,10 @@ export function WorkOrders(token: tokenInterface) {
           <span>Название продукции</span>
           <select
             className={styles.input}
-            defaultValue={workOrderIdInfo.product.name}
+            value={workOrderIdInfo.product.name}
             onChange={(e) => setChangedWorkOrderInfo({ ...workOrderIdInfo, product: { ...workOrderIdInfo.product, name: e.target.value } })}
           >
+            <option value={workOrderIdInfo.product.name}>{workOrderIdInfo.product.name}</option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.name}
@@ -411,9 +418,10 @@ export function WorkOrders(token: tokenInterface) {
 
           <span>Статус завершенности</span>
           <select className={styles.input}
-            defaultValue={workOrderIdInfo.is_finished ? 'Завершено' : 'Не завершено'}
+            defaultValue={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}
             onChange={(e) => setChangedWorkOrderInfo({ ...workOrderIdInfo, is_finished: Boolean(e.target.value) })}
           >
+            <option value={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}>{workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}</option>
             <option value="true">Завершено</option>
             <option value="false">Не завершено</option>
           </select>
@@ -423,7 +431,6 @@ export function WorkOrders(token: tokenInterface) {
       </div >
     ), node)
   }
-
 
   return (
     <div>
@@ -474,20 +481,8 @@ export function WorkOrders(token: tokenInterface) {
                   <button
                     className={[styles.button, styles.white].join(' ')}
                     onClick={() => {
+                      setWorkOrderIdInfo(workOrder);
                       setIsEditModalOpened(true);
-                      setWorkOrderIdInfo(
-                        {
-                          id: workOrder.id,
-                          number: workOrder.number,
-                          start_date: workOrder.start_date,
-                          material: {
-                            name: workOrder.material.name
-                          },
-                          product: {
-                            name: workOrder.product.name
-                          },
-                          is_finished: workOrder.is_finished
-                        });
                     }}>Открыть</button>
                 </td>
               </tr>

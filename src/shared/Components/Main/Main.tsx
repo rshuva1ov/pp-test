@@ -47,12 +47,16 @@ export interface changeWorkOrderInterface {
   number: string,
   start_date: string | null,
   material: {
-    name: string
+    id: number,
+    code: string,
+    name: string,
   },
   product: {
-    name: string
+    id: number,
+    code: string,
+    name: string,
   },
-  is_finished: boolean
+  is_finished: boolean;
 }
 
 export interface tokenInterface {
