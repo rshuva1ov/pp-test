@@ -1,0 +1,100 @@
+.form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+}
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.mainTopbar {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.button {
+    padding: 5px 15px;
+    font-size: 14px;
+    background-color: silver;
+    cursor: pointer;
+    border: 1px solid silver;
+}
+
+.input {
+    padding: 5px 15px;
+    margin-bottom: 5px;
+}
+
+.table {
+    margin-top: 30px;
+    background-color: white;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.thead {
+    background-color: #f0f0f0;
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal {
+    position: fixed;
+    left: 50%;
+    top: 10%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #FFFFFF;
+    box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.15);
+    border-radius: 7px;
+    min-width: 700px;
+    min-height: 160px;
+    max-width: 80%;
+    padding: 24px;
+    margin-bottom: 25px;
+}
+
+.white {
+    color: white;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.page {
+    padding: 10px 16px;
+    margin: 0 5px;
+    border: none;
+    background-color: #f1f1f1;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.page__current {
+    background-color: aquamarine;
+}
+
+.page:hover {
+    background-color: #ccc;
+}
+
+th {
+    cursor: pointer;
+    user-select: none;
+}
