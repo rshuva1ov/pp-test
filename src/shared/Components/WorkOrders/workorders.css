@@ -70,30 +70,6 @@ td {
     color: white;
 }
 
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.page {
-    padding: 10px 16px;
-    margin: 0 5px;
-    border: none;
-    background-color: #f1f1f1;
-    color: #333;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.page__current {
-    background-color: aquamarine;
-}
-
-.page:hover {
-    background-color: #ccc;
-}
-
 th {
     cursor: pointer;
     user-select: none;

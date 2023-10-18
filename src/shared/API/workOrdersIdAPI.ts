@@ -2,24 +2,9 @@ import axios from "axios";
 import { changeWorkOrderInterface, newWorkOrderInterface, tokenInterface } from "../Components/Main";
 
 
-export async function axiosPutWorkOrderWithId(info: changeWorkOrderInterface, token: string | null, id: number) {
+export async function axiosPutWorkOrderWithId(info: any, token: string | null, id: number) {
     const response = await axios.put(`http://127.0.0.1:8000/api/v1/workorders/${id}/`,
-        {
-            id: info.id,
-            number: info.number,
-            start_date: info.start_date,
-            material: {
-                id: info.material.id,
-                code: info.material.code,
-                name: info.material.name,
-            },
-            product: {
-                id: info.product.id,
-                code: info.product.code,
-                name: info.product.name,
-            },
-            is_finished: info.is_finished,
-        },
+        info,
         {
             headers: {
                 Authorization: `Token ${token}`

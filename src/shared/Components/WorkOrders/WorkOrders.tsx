@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { axiosPostWorkOrder } from '../../API/newWorkOrderAPI';
+import { debounce } from "debounce";
 import { axiosGetNomenclature } from '../../API/nomenclatureAPI';
 import { axiosGetWorkOrders } from '../../API/workOrdersAPI';
 import { axiosPutWorkOrderWithId } from '../../API/workOrdersIdAPI';
 import { NomenclatureInterface, WorkOrder, changeWorkOrderInterface, newWorkOrderInterface, tokenInterface } from '../Main';
 import styles from './workorders.css';
+import { Pagination } from '../Pagination';
 
 export function WorkOrders(token: tokenInterface) {
   const TOKEN = token['token'];
@@ -82,48 +84,6 @@ export function WorkOrders(token: tokenInterface) {
   }, [currentPage]);
 
   let pagesArray: number[] = [];
-
-  interface PaginationInterface {
-    pagesArray: number[],
-    totalPages: number,
-    currentPage: number,
-    changePage: (page: number) => void;
-  }
-
-  const Pagination = ({ pagesArray, totalPages, currentPage, changePage }: PaginationInterface) => {
-    function createPages(pages: number[], pagesCount: number, currentPage: number) {
-      if (pagesCount > 10) {
-        if (currentPage > 5) {
-          for (let i = currentPage - 4; i <= currentPage + 5; i++) {
-            pages.push(i);
-            if (i === pagesCount) break;
-          }
-        } else {
-          for (let i = 1; i <= 10; i++) {
-            pages.push(i);
-            if (i === pagesCount) break;
-          }
-        }
-      } else {
-        for (let i = 1; i <= pagesCount; i++) {
-          pages.push(i);
-        }
-      }
-    }
-    createPages(pagesArray, totalPages, currentPage);
-    return (
-      <div className={styles.pagination}>
-        {pagesArray.map((page, index) =>
-          <span
-            onClick={() => changePage(page)}
-            key={index + 1}
-            className={currentPage === page ? [styles.page, styles.page__current].join(' ') : styles.page}>
-            {page}
-          </span>
-        )}
-      </div>
-    );
-  };
 
   interface WorkOrdersFormInterface {
     onClose?: () => void;
@@ -285,7 +245,7 @@ export function WorkOrders(token: tokenInterface) {
     },
     is_finished: false
   });
-  const [workOrderId, setWorkOrderId] = useState(1);
+  const [change, setChange] = useState(false);
 
   const WorkOrdersEditForm = (props: WorkOrdersFormInterface) => {
     const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
@@ -343,18 +303,21 @@ export function WorkOrders(token: tokenInterface) {
     });
 
     const changedWorkOrderInfoAsync = async () => {
-      
-      const confirmation = confirm('Вы уверены, что хотите внести изменения?');
-      if (confirmation) {
-        console.log(changedWorkOrderInfo);
-        const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, workOrderIdInfo.id);
-        console.log(response);
+      if (change) {
+        const confirmation = confirm('Вы уверены, что хотите внести изменения?');
+        if (confirmation) {
+          console.log(changedWorkOrderInfo);
+          const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, workOrderIdInfo.id);
+          console.log(response);
 
-        if (response) {
-          fetchWorkorders();
-          props.onClose?.();
-        }
-      } else return;
+          if (response) {
+            fetchWorkorders();
+            props.onClose?.();
+          }
+        } else return;
+      } else {
+        props.onClose?.();
+      }
     };
 
     return ReactDOM.createPortal((
@@ -375,22 +338,26 @@ export function WorkOrders(token: tokenInterface) {
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, number: e.target.value });
             }}
+            onKeyDown={() => setChange(true)}
           />
           <span>Дата начала производства</span>
           <input
+
             className={styles.input}
             type="date"
             defaultValue={workOrderIdInfo.start_date == null ? '' : workOrderIdInfo.start_date}
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, start_date: e.target.value });
             }}
+            onKeyDown={() => setChange(true)}
           />
           <span>Название материала</span>
           <select
             className={styles.input}
-            value={workOrderIdInfo.material.name}
+            defaultValue={workOrderIdInfo.material.name}
             onChange={(e) => {
-              setChangedWorkOrderInfo({ ...workOrderIdInfo, material: { ...workOrderIdInfo.material, name: e.target.value } })
+              setChangedWorkOrderInfo({ ...workOrderIdInfo, material: { ...workOrderIdInfo.material, name: e.target.value } });
+              setChange(true);
             }
             }
           >
@@ -404,8 +371,11 @@ export function WorkOrders(token: tokenInterface) {
           <span>Название продукции</span>
           <select
             className={styles.input}
-            value={workOrderIdInfo.product.name}
-            onChange={(e) => setChangedWorkOrderInfo({ ...workOrderIdInfo, product: { ...workOrderIdInfo.product, name: e.target.value } })}
+            defaultValue={workOrderIdInfo.product.name}
+            onChange={(e) => {
+              setChangedWorkOrderInfo({ ...workOrderIdInfo, product: { ...workOrderIdInfo.product, name: e.target.value } });
+              setChange(true);
+            }}
           >
             <option value={workOrderIdInfo.product.name}>{workOrderIdInfo.product.name}</option>
             {products.map((product) => (
@@ -419,7 +389,10 @@ export function WorkOrders(token: tokenInterface) {
           <span>Статус завершенности</span>
           <select className={styles.input}
             defaultValue={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}
-            onChange={(e) => setChangedWorkOrderInfo({ ...workOrderIdInfo, is_finished: Boolean(e.target.value) })}
+            onChange={(e) => {
+              setChangedWorkOrderInfo({ ...workOrderIdInfo, is_finished: Boolean(e.target.value) });
+              setChange(true);
+            }}
           >
             <option value={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}>{workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}</option>
             <option value="true">Завершено</option>
