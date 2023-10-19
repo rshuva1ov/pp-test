@@ -14,6 +14,7 @@ export const indexTemplate = (content) => `
   <div id="react_root">${content}</div>
   <div id="modal-form_root"></div>
   <div id="modal-edit-form_root"></div>
+  <div id="modal-product-form_root"></div>
 </body>
 
 </html>

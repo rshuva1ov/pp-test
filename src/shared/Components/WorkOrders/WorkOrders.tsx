@@ -229,6 +229,7 @@ export function WorkOrders(token: tokenInterface) {
   }
 
   const [isEditModalOpened, setIsEditModalOpened] = useState(false);
+  const [change, setChange] = useState(false);
   const [workOrderIdInfo, setWorkOrderIdInfo] = useState<changeWorkOrderInterface>({
     id: 1,
     number: '',
@@ -245,7 +246,10 @@ export function WorkOrders(token: tokenInterface) {
     },
     is_finished: false
   });
-  const [change, setChange] = useState(false);
+
+  interface WorkOrdersFormInterface {
+    onClose?: () => void;
+  }
 
   const WorkOrdersEditForm = (props: WorkOrdersFormInterface) => {
     const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
@@ -255,11 +259,11 @@ export function WorkOrders(token: tokenInterface) {
     const node = document.querySelector('#modal-edit-form_root');
     if (!node) return null;
 
-    const ref = useRef<HTMLDivElement>(null);
+    const editRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       function handleClick(event: MouseEvent) {
-        if (event.target instanceof Node && !ref.current?.contains(event.target)) {
+        if (event.target instanceof Node && !editRef.current?.contains(event.target) && !productRef.current?.contains(event.target)) {
           props.onClose?.();
         }
       }
@@ -312,10 +316,7 @@ export function WorkOrders(token: tokenInterface) {
       if (change) {
         const confirmation = confirm('Вы уверены, что хотите внести изменения?');
         if (confirmation) {
-          console.log(changedWorkOrderInfo);
           const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, workOrderIdInfo.id);
-          console.log(response);
-
           if (response) {
             fetchWorkorders();
             props.onClose?.();
@@ -330,9 +331,35 @@ export function WorkOrders(token: tokenInterface) {
       setChange(true)
     }, [changedWorkOrderInfo])
 
+
+    const [isProductModalOpened, setIsProductModalOpened] = useState(false);
+    const productRef = useRef<HTMLDivElement>(null);
+
+    const WorkOrdersProductForm = (props: WorkOrdersFormInterface) => {
+      const node = document.querySelector('#modal-product-form_root');
+      if (!node) return null;
+
+      useEffect(() => {
+        function handleClick(event: MouseEvent) {
+          if (event.target instanceof Node && !productRef.current?.contains(event.target)) {
+            props.onClose?.();
+          }
+        }
+        document.addEventListener('click', handleClick);
+        return () => {
+          document.removeEventListener('click', handleClick);
+        }
+      }, [])
+
+      return ReactDOM.createPortal((
+        <div className={styles.modal} ref={productRef}>{changedWorkOrderInfo.id}</div>
+      ), node)
+    }
+
     return ReactDOM.createPortal((
-      <div className={styles.modal} ref={ref}>
+      <div className={styles.modal} ref={editRef}>
         <h2>Форма детального просмотра и редактирования наряда</h2>
+        <button className={styles.button} onClick={() => setIsProductModalOpened(true)}>123</button>
         <form className={styles.editForm}
           onSubmit={(e) => {
             e.preventDefault();
@@ -411,9 +438,15 @@ export function WorkOrders(token: tokenInterface) {
 
           <button type='submit' className={styles.button}>Завершить</button>
         </form>
+        {
+          isProductModalOpened && (
+            <WorkOrdersProductForm onClose={() => setIsEditModalOpened(false)} />
+          )
+        }
       </div >
     ), node)
   }
+
 
   return (
     <div>
