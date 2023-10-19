@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { axiosPostWorkOrder } from '../../API/newWorkOrderAPI';
-import { debounce } from "debounce";
 import { axiosGetNomenclature } from '../../API/nomenclatureAPI';
 import { axiosGetWorkOrders } from '../../API/workOrdersAPI';
 import { axiosPutWorkOrderWithId } from '../../API/workOrdersIdAPI';
 import { NomenclatureInterface, WorkOrder, changeWorkOrderInterface, newWorkOrderInterface, tokenInterface } from '../Main';
+import { debounce } from 'debounce';
 import styles from './workorders.css';
 import { Pagination } from '../Pagination';
 
@@ -303,6 +303,12 @@ export function WorkOrders(token: tokenInterface) {
     });
 
     const changedWorkOrderInfoAsync = async () => {
+      for (const field in changedWorkOrderInfo) {
+        if (changedWorkOrderInfo[field as keyof changeWorkOrderInterface] === '') {
+          alert('Пожалуйста, заполните все поля формы.');
+          return;
+        }
+      }
       if (change) {
         const confirmation = confirm('Вы уверены, что хотите внести изменения?');
         if (confirmation) {
@@ -319,6 +325,10 @@ export function WorkOrders(token: tokenInterface) {
         props.onClose?.();
       }
     };
+
+    useEffect(() => {
+      setChange(true)
+    }, [changedWorkOrderInfo])
 
     return ReactDOM.createPortal((
       <div className={styles.modal} ref={ref}>
@@ -338,7 +348,6 @@ export function WorkOrders(token: tokenInterface) {
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, number: e.target.value });
             }}
-            onKeyDown={() => setChange(true)}
           />
           <span>Дата начала производства</span>
           <input
@@ -357,7 +366,7 @@ export function WorkOrders(token: tokenInterface) {
             defaultValue={workOrderIdInfo.material.name}
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, material: { ...workOrderIdInfo.material, name: e.target.value } });
-              setChange(true);
+              setChange(true)
             }
             }
           >
@@ -368,13 +377,14 @@ export function WorkOrders(token: tokenInterface) {
               </option>
             ))}
           </select>
+
           <span>Название продукции</span>
           <select
             className={styles.input}
             defaultValue={workOrderIdInfo.product.name}
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, product: { ...workOrderIdInfo.product, name: e.target.value } });
-              setChange(true);
+              setChange(true)
             }}
           >
             <option value={workOrderIdInfo.product.name}>{workOrderIdInfo.product.name}</option>
