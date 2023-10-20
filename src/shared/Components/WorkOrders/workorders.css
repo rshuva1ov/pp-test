@@ -6,9 +6,21 @@
 }
 
 .editForm {
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
     width: 100%;
+}
+
+.productsForm {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 74%;
+}
+
+.productsFormContainer {
+    min-height: 470px;
 }
 
 .mainTopbar {
@@ -35,6 +47,11 @@
     background-color: white;
     width: 100%;
     border-collapse: collapse;
+}
+
+.tbody {
+    max-height: 300px;
+    overflow-y: scroll;
 }
 
 .thead {

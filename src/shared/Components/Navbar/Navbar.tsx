@@ -16,7 +16,8 @@ export function Navbar() {
     <div className={styles.navbar}>
       <div className={styles.container}>
         <div className={styles.navbar__content}>
-        <button className={styles.button} onClick={handleLogout}>Выйти</button>
+          <a href="#">POLYPAK</a>
+          <button className={styles.button} onClick={handleLogout}>Выйти</button>
         </div>
       </div>
     </div>

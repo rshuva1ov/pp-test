@@ -63,6 +63,21 @@ export interface tokenInterface {
   token: string | null;
 }
 
+export interface WorkOrdersFormInterface {
+  onClose?: () => void;
+}
+
+export interface producedProductsInterface {
+  id: number,
+  serial: string,
+  weight: string,
+  date: string,
+}
+
+export interface newProductInterface {
+  weight: string;
+}
+
 export function Main() {
   const token = localStorage.getItem('token');
 

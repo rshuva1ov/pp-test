@@ -1,0 +1,78 @@
+.none {
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    left: 50%;
+    top: 10%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #FFFFFF;
+    box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.15);
+    border-radius: 7px;
+    min-width: 700px;
+    min-height: 160px;
+    max-width: 80%;
+    padding: 24px;
+    margin-bottom: 25px;
+}
+
+.print {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.printContainer {
+    display: flex;
+    justify-content: end;
+}
+
+.printButton {
+    display: flex;
+    align-self: center;
+}
+
+.button {
+    padding: 5px 15px;
+    font-size: 14px;
+    background-color: silver;
+    cursor: pointer;
+    border: 1px solid silver;
+}
+
+.label {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.label__container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.label__content {
+    display: inline-block;
+    padding: 50px;
+}
+
+.label__svg {
+    padding: 30px;
+}
+
+.label__title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.label__field {
+    margin-bottom: 5px;
+}

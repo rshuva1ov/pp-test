@@ -1,13 +1,15 @@
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { axiosNewProducedProducts } from '../../API/newProducedProductsAPI ';
 import { axiosPostWorkOrder } from '../../API/newWorkOrderAPI';
 import { axiosGetNomenclature } from '../../API/nomenclatureAPI';
+import { axiosProducedProducts } from '../../API/producedProductsAPI';
 import { axiosGetWorkOrders } from '../../API/workOrdersAPI';
 import { axiosPutWorkOrderWithId } from '../../API/workOrdersIdAPI';
-import { NomenclatureInterface, WorkOrder, changeWorkOrderInterface, newWorkOrderInterface, tokenInterface } from '../Main';
-import { debounce } from 'debounce';
-import styles from './workorders.css';
+import { NomenclatureInterface, WorkOrder, WorkOrdersFormInterface, changeWorkOrderInterface, newProductInterface, newWorkOrderInterface, producedProductsInterface, tokenInterface } from '../Main';
 import { Pagination } from '../Pagination';
+import { PrintDocket } from '../PrintDocket';
+import styles from './workorders.css';
 
 export function WorkOrders(token: tokenInterface) {
   const TOKEN = token['token'];
@@ -84,10 +86,6 @@ export function WorkOrders(token: tokenInterface) {
   }, [currentPage]);
 
   let pagesArray: number[] = [];
-
-  interface WorkOrdersFormInterface {
-    onClose?: () => void;
-  }
 
   const [isModalOpened, setIsModalOpened] = useState(false);
 
@@ -177,8 +175,8 @@ export function WorkOrders(token: tokenInterface) {
 
     return ReactDOM.createPortal((
       <div>
-        <h2>Форма создания наряда</h2>
         <form className={[styles.form, styles.modal].join(' ')} ref={ref}>
+          <h2>Форма создания наряда</h2>
           <input className={styles.input}
             placeholder="Введите код или название номенклатуры"
             onChange={(e) => filterNomenclature(e.target.value)}
@@ -246,10 +244,6 @@ export function WorkOrders(token: tokenInterface) {
     },
     is_finished: false
   });
-
-  interface WorkOrdersFormInterface {
-    onClose?: () => void;
-  }
 
   const WorkOrdersEditForm = (props: WorkOrdersFormInterface) => {
     const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
@@ -351,15 +345,101 @@ export function WorkOrders(token: tokenInterface) {
         }
       }, [])
 
+      const [producedProducts, setProducedProducts] = useState<producedProductsInterface[]>([]);
+      const [newProduct, setNewProduct] = useState<newProductInterface>({
+        weight: '',
+      });
+
+      const saveProducedProduct = async () => {
+        for (const field in newProduct) {
+          if (newProduct[field as keyof newProductInterface] === '') {
+            alert('Пожалуйста, заполните все поля формы.');
+            return;
+          }
+        }
+        const confirmation = confirm('Добавить произведенную продукцию?');
+        if (confirmation) {
+          const response = await axiosNewProducedProducts(workOrderIdInfo.id, TOKEN, newProduct);
+          if (response) {
+            fetchProducedProducts();
+            setNewProduct({
+              weight: '',
+            });
+          }
+        } else return;
+      }
+
+
+      useEffect(() => {
+        fetchProducedProducts();
+      }, [])
+
+      const fetchProducedProducts = async () => {
+        const response = await axiosProducedProducts(workOrderIdInfo.id, TOKEN);
+        if (response) {
+          setProducedProducts(response.data);
+        }
+      };
+
       return ReactDOM.createPortal((
-        <div className={styles.modal} ref={productRef}>{changedWorkOrderInfo.id}</div>
+        <div className={styles.modal} ref={productRef}>
+          <div className={styles.productsFormContainer}>
+            <h2>Форма производства продукции</h2>
+            <form className={[styles.form, styles.productsForm].join(' ')} onSubmit={(e) => {
+              e.preventDefault();
+              saveProducedProduct();
+            }}>
+              <input
+                className={styles.input}
+                type="text"
+                placeholder="Масса произведенной продукции"
+                value={newProduct.weight}
+                onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
+              />
+              <button className={styles.button} type="submit">
+                Сохранить произведенную продукцию
+              </button>
+            </form>
+
+
+            <h2>Список произведенной продукции</h2>
+            <table className={styles.table}>
+              <thead className={styles.thead}>
+                <tr>
+                  <th>Номер продукта</th>
+                  <th>Масса</th>
+                  <th>Дата</th>
+                  <th></th>
+                </tr>
+              </thead>
+              {producedProducts
+                ? <tbody className={styles.tbody}>
+                  {producedProducts.map((product) => (
+                    <tr key={product.id}>
+                      <td>{product.serial}</td>
+                      <td>{product.weight}</td>
+                      <td>{product.date.split("T")[0]
+                        .split("-")
+                        .reverse()
+                        .join(".")}</td>
+                      <td>
+                        <PrintDocket product={product} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                : <tbody>Ожидание...</tbody>
+              }
+            </table>
+          </div>
+        </div>
       ), node)
     }
 
     return ReactDOM.createPortal((
       <div className={styles.modal} ref={editRef}>
         <h2>Форма детального просмотра и редактирования наряда</h2>
-        <button className={styles.button} onClick={() => setIsProductModalOpened(true)}>123</button>
+        <button className={styles.button} onClick={() => setIsProductModalOpened(true)}>Интерфейс оператора производственного процесса</button>
         <form className={styles.editForm}
           onSubmit={(e) => {
             e.preventDefault();
@@ -393,7 +473,6 @@ export function WorkOrders(token: tokenInterface) {
             defaultValue={workOrderIdInfo.material.name}
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, material: { ...workOrderIdInfo.material, name: e.target.value } });
-              setChange(true)
             }
             }
           >
@@ -411,7 +490,6 @@ export function WorkOrders(token: tokenInterface) {
             defaultValue={workOrderIdInfo.product.name}
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, product: { ...workOrderIdInfo.product, name: e.target.value } });
-              setChange(true)
             }}
           >
             <option value={workOrderIdInfo.product.name}>{workOrderIdInfo.product.name}</option>
@@ -428,7 +506,6 @@ export function WorkOrders(token: tokenInterface) {
             defaultValue={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}
             onChange={(e) => {
               setChangedWorkOrderInfo({ ...workOrderIdInfo, is_finished: Boolean(e.target.value) });
-              setChange(true);
             }}
           >
             <option value={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}>{workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}</option>
@@ -474,6 +551,7 @@ export function WorkOrders(token: tokenInterface) {
             <th onClick={() => handleSort('Код продукции')}>Код продукции</th>
             <th onClick={() => handleSort('Название продукции')}>Название продукции</th>
             <th onClick={() => handleSort('Статус завершенности')}>Статус завершенности</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
