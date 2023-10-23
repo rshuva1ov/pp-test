@@ -483,10 +483,11 @@ export function WorkOrders(token: tokenInterface) {
           <select className={styles.input}
             defaultValue={changedWorkOrderInfo.is_finished === true ? 'Завершено' : 'Не завершено'}
             onChange={(e) => {
-              setChangedWorkOrderInfo({ ...changedWorkOrderInfo, is_finished: Boolean(e.target.value) });
+              setChangedWorkOrderInfo({ ...changedWorkOrderInfo, is_finished: e.target.value == "true" ? true : false }
+              );
             }}
           >
-            <option value={changedWorkOrderInfo.is_finished === true ? 'Завершено' : 'Не завершено'}>{changedWorkOrderInfo.is_finished === true ? 'Завершено' : 'Не завершено'}</option>
+            <option value={changedWorkOrderInfo.is_finished.toString()}>{changedWorkOrderInfo.is_finished === true ? 'Завершено' : 'Не завершено'}</option>
             <option value="true">Завершено</option>
             <option value="false">Не завершено</option>
           </select>
