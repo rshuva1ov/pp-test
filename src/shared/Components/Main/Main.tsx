@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar } from '../Navbar';
-import styles from './main.css';
 import { WorkOrders } from '../WorkOrders';
+import styles from './main.css';
 
 export interface WorkOrder {
   id: number,
@@ -47,12 +47,12 @@ export interface changeWorkOrderInterface {
   number: string,
   start_date: string | null,
   material: {
-    id: number,
+    id: number | string,
     code: string,
     name: string,
   },
   product: {
-    id: number,
+    id: number | string,
     code: string,
     name: string,
   },
@@ -77,6 +77,14 @@ export interface producedProductsInterface {
 export interface newProductInterface {
   weight: string;
 }
+
+export type FormData = {
+  number: string;
+  start_date: string | null;
+  material: string;
+  product: string;
+  is_finished: boolean;
+};
 
 export function Main() {
   const token = localStorage.getItem('token');

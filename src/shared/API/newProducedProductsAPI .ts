@@ -1,7 +1,7 @@
 import axios from "axios";
 import { newProductInterface, tokenInterface } from "../Components/Main";
 
-export async function axiosNewProducedProducts(id: any, token: any, newProduct: newProductInterface) {
+export async function axiosNewProducedProducts(id: number | string, token: string | null, newProduct: newProductInterface) {
     try {
         const response = await axios.post(`http://127.0.0.1:8000/api/v1/workorders/${id}/products/`, newProduct, {
             headers: {

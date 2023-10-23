@@ -1,7 +1,7 @@
 import axios from "axios";
 import { tokenInterface } from "../Components/Main";
 
-export const axiosGetNomenclature = async (token: any) => {
+export const axiosGetNomenclature = async (token: string | null) => {
     try {
         const response = await axios.get('http://127.0.0.1:8000/api/v1/nomenclatures/', {
             headers: {
@@ -12,16 +12,16 @@ export const axiosGetNomenclature = async (token: any) => {
     } catch (error: any) {
         switch (error.code) {
             case 'ERR_BAD_REQUEST':
-               alert('Данные не верны');
+                alert('Данные не верны');
                 break;
             case 'ERR_NETWORK':
-               alert('Ошибка сервера');
+                alert('Ошибка сервера');
                 break;
             case 'ERR_CONNECTION_REFUSED':
-               alert('Ошибка соединения с сервером');
+                alert('Ошибка соединения с сервером');
                 break;
             default:
-               alert('Что-то пошло не так, повторите попытку');
+                alert('Что-то пошло не так, повторите попытку');
                 break;
         }
     }

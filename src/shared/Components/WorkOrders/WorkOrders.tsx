@@ -6,7 +6,7 @@ import { axiosGetNomenclature } from '../../API/nomenclatureAPI';
 import { axiosProducedProducts } from '../../API/producedProductsAPI';
 import { axiosGetWorkOrders } from '../../API/workOrdersAPI';
 import { axiosPutWorkOrderWithId } from '../../API/workOrdersIdAPI';
-import { NomenclatureInterface, WorkOrder, WorkOrdersFormInterface, changeWorkOrderInterface, newProductInterface, newWorkOrderInterface, producedProductsInterface, tokenInterface } from '../Main';
+import { FormData, NomenclatureInterface, WorkOrder, WorkOrdersFormInterface, changeWorkOrderInterface, newProductInterface, newWorkOrderInterface, producedProductsInterface, tokenInterface } from '../Main';
 import { Pagination } from '../Pagination';
 import { PrintDocket } from '../PrintDocket';
 import styles from './workorders.css';
@@ -127,14 +127,6 @@ export function WorkOrders(token: tokenInterface) {
       const filteredMaterials = nomenclature.filter(n => n.code.includes(codeOrName) || n.name.includes(codeOrName));
       setMaterials(filteredMaterials);
       setProducts(filteredMaterials);
-    };
-
-    type FormData = {
-      number: string;
-      start_date: string | null;
-      material: string;
-      product: string;
-      is_finished: boolean;
     };
 
     const createWorkOrder = async () => {
@@ -283,24 +275,9 @@ export function WorkOrders(token: tokenInterface) {
       setProducts(nomenclature);
     }, [nomenclature]);
 
-    const [changedWorkOrderInfo, setChangedWorkOrderInfo] = useState<changeWorkOrderInterface>({
-      id: 1,
-      number: '',
-      start_date: '',
-      material: {
-        id: 1,
-        code: '',
-        name: '',
-      },
-      product: {
-        id: 1,
-        code: '',
-        name: '',
-      },
-      is_finished: false
-    });
+    const [changedWorkOrderInfo, setChangedWorkOrderInfo] = useState<changeWorkOrderInterface>(workOrderIdInfo);
 
-    const changedWorkOrderInfoAsync = async () => {
+    const changedWorkOrderInfoAsync = async (changedWorkOrderInfo: changeWorkOrderInterface) => {
       for (const field in changedWorkOrderInfo) {
         if (changedWorkOrderInfo[field as keyof changeWorkOrderInterface] === '') {
           alert('Пожалуйста, заполните все поля формы.');
@@ -310,7 +287,7 @@ export function WorkOrders(token: tokenInterface) {
       if (change) {
         const confirmation = confirm('Вы уверены, что хотите внести изменения?');
         if (confirmation) {
-          const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, workOrderIdInfo.id);
+          const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, changedWorkOrderInfo.id);
           if (response) {
             fetchWorkorders();
             props.onClose?.();
@@ -443,7 +420,7 @@ export function WorkOrders(token: tokenInterface) {
         <form className={styles.editForm}
           onSubmit={(e) => {
             e.preventDefault();
-            changedWorkOrderInfoAsync();
+            changedWorkOrderInfoAsync(changedWorkOrderInfo);
           }
           }>
 
@@ -451,32 +428,33 @@ export function WorkOrders(token: tokenInterface) {
           <input
             className={styles.input}
             type="text"
-            defaultValue={workOrderIdInfo.number}
+            defaultValue={changedWorkOrderInfo.number}
             onChange={(e) => {
-              setChangedWorkOrderInfo({ ...workOrderIdInfo, number: e.target.value });
+              setChangedWorkOrderInfo({ ...changedWorkOrderInfo, number: e.target.value });
             }}
           />
+
           <span>Дата начала производства</span>
           <input
 
             className={styles.input}
             type="date"
-            defaultValue={workOrderIdInfo.start_date == null ? '' : workOrderIdInfo.start_date}
+            defaultValue={changedWorkOrderInfo.start_date == null ? '' : changedWorkOrderInfo.start_date}
             onChange={(e) => {
-              setChangedWorkOrderInfo({ ...workOrderIdInfo, start_date: e.target.value });
+              setChangedWorkOrderInfo({ ...changedWorkOrderInfo, start_date: e.target.value });
             }}
-            onKeyDown={() => setChange(true)}
           />
+
           <span>Название материала</span>
           <select
             className={styles.input}
-            defaultValue={workOrderIdInfo.material.name}
+            defaultValue={changedWorkOrderInfo.material.id}
             onChange={(e) => {
-              setChangedWorkOrderInfo({ ...workOrderIdInfo, material: { ...workOrderIdInfo.material, name: e.target.value } });
+              setChangedWorkOrderInfo({ ...changedWorkOrderInfo, material: { ...changedWorkOrderInfo.material, id: e.target.value } });
             }
             }
           >
-            <option value={workOrderIdInfo.material.name}>{workOrderIdInfo.material.name}</option>
+            <option value={changedWorkOrderInfo.material.id}>{changedWorkOrderInfo.material.name}</option>
             {materials.map((material) => (
               <option key={material.id} value={material.id}>
                 {material.name}
@@ -487,12 +465,12 @@ export function WorkOrders(token: tokenInterface) {
           <span>Название продукции</span>
           <select
             className={styles.input}
-            defaultValue={workOrderIdInfo.product.name}
+            defaultValue={changedWorkOrderInfo.product.id}
             onChange={(e) => {
-              setChangedWorkOrderInfo({ ...workOrderIdInfo, product: { ...workOrderIdInfo.product, name: e.target.value } });
+              setChangedWorkOrderInfo({ ...changedWorkOrderInfo, product: { ...changedWorkOrderInfo.product, id: e.target.value } });
             }}
           >
-            <option value={workOrderIdInfo.product.name}>{workOrderIdInfo.product.name}</option>
+            <option value={changedWorkOrderInfo.product.id}>{changedWorkOrderInfo.product.name}</option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.name}
@@ -503,12 +481,12 @@ export function WorkOrders(token: tokenInterface) {
 
           <span>Статус завершенности</span>
           <select className={styles.input}
-            defaultValue={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}
+            defaultValue={changedWorkOrderInfo.is_finished === true ? 'Завершено' : 'Не завершено'}
             onChange={(e) => {
-              setChangedWorkOrderInfo({ ...workOrderIdInfo, is_finished: Boolean(e.target.value) });
+              setChangedWorkOrderInfo({ ...changedWorkOrderInfo, is_finished: Boolean(e.target.value) });
             }}
           >
-            <option value={workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}>{workOrderIdInfo.is_finished === true ? 'Завершено' : 'Не завершено'}</option>
+            <option value={changedWorkOrderInfo.is_finished === true ? 'Завершено' : 'Не завершено'}>{changedWorkOrderInfo.is_finished === true ? 'Завершено' : 'Не завершено'}</option>
             <option value="true">Завершено</option>
             <option value="false">Не завершено</option>
           </select>

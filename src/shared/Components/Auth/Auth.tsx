@@ -1,9 +1,9 @@
 import React, { FormEvent, useState } from 'react';
-import { axiosAuth } from '../../API/userAPI';
-import styles from './auth.css';
 import { useDispatch } from 'react-redux';
 import { setAuth } from '../../../redux/authReducer';
 import { setToken } from '../../../redux/tokenReducer';
+import { axiosAuth } from '../../API/userAPI';
+import styles from './auth.css';
 
 export function Auth() {
   const [username, setUsername] = useState('');

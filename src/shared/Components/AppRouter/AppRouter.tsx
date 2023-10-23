@@ -10,13 +10,8 @@ export function AppRouter() {
   const token = useSelector<RootState, string>(
     (state) => state.tokenReducer.token
   );
-
-  // console.log(token);
-
   const auth = localStorage.getItem('auth');
-
-  // console.log(auth);
-
+  
   return (
     auth
       ?

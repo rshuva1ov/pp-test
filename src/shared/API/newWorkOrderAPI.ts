@@ -1,7 +1,7 @@
 import axios from "axios";
-import { tokenInterface } from "../Components/Main";
+import { newWorkOrderInterface, tokenInterface } from "../Components/Main";
 
-export async function axiosPostWorkOrder(newWorkOrder: any, token: any) {
+export async function axiosPostWorkOrder(newWorkOrder: newWorkOrderInterface, token: string | null) {
     try {
         const response = await axios.post('http://127.0.0.1:8000/api/v1/workorders/', newWorkOrder, {
             headers: {

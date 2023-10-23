@@ -1,7 +1,7 @@
 import axios from "axios";
 import { tokenInterface } from "../Components/Main";
 
-export async function axiosProducedProducts(id: any, token: any) {
+export async function axiosProducedProducts(id: number | string, token: string | null) {
     try {
         const response = await axios.get(`http://127.0.0.1:8000/api/v1/workorders/${id}/products/`, {
             headers: {

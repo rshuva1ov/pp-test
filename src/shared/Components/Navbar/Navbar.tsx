@@ -1,8 +1,8 @@
 import React from 'react';
-import styles from './navbar.css';
 import { useDispatch } from 'react-redux';
 import { removeAuth } from '../../../redux/authReducer';
 import { removeToken } from '../../../redux/tokenReducer';
+import styles from './navbar.css';
 
 export function Navbar() {
   const dispatch = useDispatch();
