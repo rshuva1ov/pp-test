@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { setAuth } from '../../../redux/authReducer';
 import { setToken } from '../../../redux/tokenReducer';
 import { axiosAuth } from '../../API/userAPI';
-import styles from './auth.css';
+import styles from './auth.module.css';
 
 export function Auth() {
   const [username, setUsername] = useState('');
