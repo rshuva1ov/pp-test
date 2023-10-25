@@ -1,19 +1,44 @@
-# ==== CONFIGURE =====
-# Use a Node 16 base image
-FROM node:16-alpine 
-# Set the working directory to /app inside the container
+# Установка базового образа Node.js
+FROM node:14.17.0 as builder
+
+# Установка рабочей директории внутри контейнера
 WORKDIR /app
-# Copy app files
+
+# Копирование package.json и package-lock.json в рабочую директорию
+COPY package*.json ./
+
+# Установка зависимостей через npm
+RUN npm install
+
+# Копирование всех файлов проекта в контейнер
 COPY . .
-# ==== BUILD =====
-# Install dependencies (npm ci makes sure the exact versions in the lockfile gets installed)
-RUN npm ci
-# Build the app
+
+# Сборка приложения с помощью webpack
 RUN npm run build:prod
-# ==== RUN =======
-# Set the env to "production"
-ENV NODE_ENV production
-# # Expose the port on which the app will be running (3000 is the default that `serve` uses)
-# EXPOSE 3000
-# Start the app
-CMD [ "npx", "serve", "build:prod" ]
+
+# Создание финального контейнера
+FROM node:14.17.0
+
+# Установка рабочей директории внутри контейнера
+WORKDIR /app
+
+# Копирование собранного приложения из builder-образа в финальный контейнер
+COPY --from=builder /app/dist ./dist
+
+# Копирование package.json и package-lock.json в финальный контейнер
+COPY package*.json ./
+
+# Установка зависимостей через npm
+RUN npm install
+
+# Установка Express.js для службы сервера
+RUN npm install express
+
+# Определение порта, на котором будет прослушиваться сервер Express.js
+ENV PORT=3000
+
+# Открывает порт в контейнере
+EXPOSE $PORT
+
+# Запуск сервера Express.js
+CMD ["node", "dist/server/server.js"]
