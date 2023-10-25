@@ -11,30 +11,35 @@ export function AppRouter() {
     (state) => state.tokenReducer.token
   );
   const auth = localStorage.getItem('auth');
-  
+
   return (
     auth
       ?
       <Routes>
-        {privateRoutes.map(route =>
-          <Route
-            element={<route.element />}
-            path={route.path}
-            key={route.path}
-          />
-        )}
+        {privateRoutes
+          ? privateRoutes.map(route =>
+            <Route
+              element={<route.element />}
+              path={route.path}
+              key={route.path}
+            />
+          )
+          : <Route path='/' element={<Main />} />
+        }
         <Route path='/' element={<Main />} />
         <Route path="/*" element={<Main />} />
       </Routes>
       :
       <Routes>
-        {publicRoutes.map(route =>
-          <Route
-            element={<route.element />}
-            path={route.path}
-            key={route.path}
-          />
-        )}
+        {publicRoutes
+          ? publicRoutes.map(route =>
+            <Route
+              element={<route.element />}
+              path={route.path}
+              key={route.path}
+            />
+          )
+          : <Route path="/" element={<Auth />} />}
         <Route index element={<Navigate to="/auth" />} />
         <Route path="/" element={<Auth />} />
         <Route path="*" element={<Auth />} />

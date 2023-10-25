@@ -186,11 +186,13 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value="">Выберите материал</option>
-            {materials.map((material) => (
-              <option key={material.id} value={material.id}>
-                {material.name}
-              </option>
-            ))}
+            {materials
+              ? materials.map((material) => (
+                <option key={material.id} value={material.id}>
+                  {material.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
 
           <select className={styles.input}
@@ -200,11 +202,13 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value="">Выберите продукцию</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
+            {products
+              ? products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
           <input className={styles.input}
             type="date"
@@ -391,19 +395,23 @@ export function WorkOrders(token: tokenInterface) {
               </thead>
               {producedProducts
                 ? <tbody className={styles.tbody}>
-                  {producedProducts.map((product) => (
-                    <tr key={product.id}>
-                      <td>{product.serial}</td>
-                      <td>{product.weight}</td>
-                      <td>{product.date.split("T")[0]
-                        .split("-")
-                        .reverse()
-                        .join(".")}</td>
-                      <td>
-                        <PrintDocket product={product} />
-                      </td>
-                    </tr>
-                  ))}
+                  {producedProducts
+                    ? producedProducts.map((product) => (
+                      <tr key={product.id}>
+                        <td>{product.serial}</td>
+                        <td>{product.weight}</td>
+                        <td>{product
+                          ? product.date.split("T")[0]
+                            .split("-")
+                            .reverse()
+                            .join(".")
+                          : ''}</td>
+                        <td>
+                          <PrintDocket product={product} />
+                        </td>
+                      </tr>
+                    ))
+                    : <tr></tr>}
                 </tbody>
                 : <tbody>Ожидание...</tbody>
               }
@@ -455,11 +463,13 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value={changedWorkOrderInfo.material.id}>{changedWorkOrderInfo.material.name}</option>
-            {materials.map((material) => (
-              <option key={material.id} value={material.id}>
-                {material.name}
-              </option>
-            ))}
+            {materials
+              ? materials.map((material) => (
+                <option key={material.id} value={material.id}>
+                  {material.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
 
           <span>Название продукции</span>
@@ -471,11 +481,13 @@ export function WorkOrders(token: tokenInterface) {
             }}
           >
             <option value={changedWorkOrderInfo.product.id}>{changedWorkOrderInfo.product.name}</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
+            {products
+              ? products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
 
 
@@ -560,9 +572,7 @@ export function WorkOrders(token: tokenInterface) {
                 </td>
               </tr>
             ))
-            : <tr>
-              Ожидаем
-            </tr>
+            : <tr></tr>
           }
         </tbody>
       </table>
