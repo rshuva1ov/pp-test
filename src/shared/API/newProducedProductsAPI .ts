@@ -24,5 +24,10 @@ export async function axiosNewProducedProducts(id: number | string, token: strin
                 alert('Что-то пошло не так, повторите попытку');
                 break;
         }
+        switch (error.response.data.detail) {
+            case 'У вас недостаточно прав для выполнения данного действия.':
+                alert('У вас недостаточно прав для выполнения данного действия.');
+                break;
+        }
     }
 }
