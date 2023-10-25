@@ -20,7 +20,7 @@ module.exports = {
   mode: NODE_ENV ? NODE_ENV : "development",
   entry: [
     path.resolve(__dirname, "../src/client/index.jsx"),
-    "webpack-hot-middleware/client?path=//localhost:3001/static/__webpack_hmr",
+    // "webpack-hot-middleware/client?path=//localhost:3001/static/__webpack_hmr",
   ],
   output: {
     path: path.resolve(__dirname, "../dist/client"),
