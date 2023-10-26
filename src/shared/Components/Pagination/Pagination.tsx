@@ -31,14 +31,16 @@ export const Pagination = ({ pagesArray, totalPages, currentPage, changePage }: 
   createPages(pagesArray, totalPages, currentPage);
   return (
     <div className={styles.pagination}>
-      {pagesArray.map((page, index) =>
-        <span
-          onClick={() => changePage(page)}
-          key={index + 1}
-          className={currentPage === page ? [styles.page, styles.page__current].join(' ') : styles.page}>
-          {page}
-        </span>
-      )}
+      {pagesArray
+        ? pagesArray.map((page, index) =>
+          <span
+            onClick={() => changePage(page)}
+            key={index + 1}
+            className={currentPage === page ? [styles.page, styles.page__current].join(' ') : styles.page}>
+            {page}
+          </span>
+        )
+        : <span></span>}
     </div>
   );
 };

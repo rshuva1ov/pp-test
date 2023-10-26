@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { RootState } from '../../../redux';
 import { privateRoutes, publicRoutes } from '../../routes/Routes';
 import { Auth } from '../Auth';

@@ -350,23 +350,22 @@ export function WorkOrders(token: tokenInterface) {
               </thead>
               {producedProducts
                 ? <tbody className={styles.tbody}>
-                  {producedProducts
-                    ? producedProducts.map((product) => (
-                      <tr key={product.id}>
-                        <td>{product.serial}</td>
-                        <td>{product.weight}</td>
-                        <td>{product
-                          ? product.date.split("T")[0]
-                            .split("-")
-                            .reverse()
-                            .join(".")
-                          : ''}</td>
-                        <td>
-                          <PrintDocket product={product} />
-                        </td>
-                      </tr>
-                    ))
-                    : <tr></tr>}
+                  {producedProducts.map((product) => (
+                    <tr key={product.id}>
+                      <td>{product.serial}</td>
+                      <td>{product.weight}</td>
+                      <td>{product
+                        ? product.date.split("T")[0]
+                          .split("-")
+                          .reverse()
+                          .join(".")
+                        : ''}</td>
+                      <td>
+                        <PrintDocket product={product} />
+                      </td>
+                    </tr>
+                  ))
+                  }
                 </tbody>
                 : <tbody>Ожидание...</tbody>
               }
