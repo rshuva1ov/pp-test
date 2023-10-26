@@ -40,7 +40,6 @@ export function AppRouter() {
             />
           )
           : <Route path="/" element={<Auth />} />}
-        <Route index element={<Navigate to="/auth" />} />
         <Route path="/" element={<Auth />} />
         <Route path="*" element={<Auth />} />
       </Routes>
