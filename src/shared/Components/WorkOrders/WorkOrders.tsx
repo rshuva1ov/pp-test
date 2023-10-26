@@ -16,8 +16,8 @@ export function WorkOrders(token: tokenInterface) {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [search, setSearch] = useState('');
   const limit = 10;
-  const [query, setQuery] = useState('');
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -27,53 +27,8 @@ export function WorkOrders(token: tokenInterface) {
     return Math.ceil(totalOrders / limit);
   };
 
-  const [sortColumn, setSortColumn] = useState<string>(''); // столбец сортировки
-  const [sortOrder, setSortOrder] = useState<string>(''); // порядок сортировки
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortOrder('asc');
-    }
-  };
-
-  const sortedWorkOrders = workOrders.slice().sort((a, b) => {
-    if (sortColumn === 'id') {
-      return sortOrder === 'asc' ? a.id - b.id : b.id - a.id;
-    } else if (sortColumn === 'Номер наряда') {
-      return sortOrder === 'asc' ? a.number.localeCompare(b.number) : b.number.localeCompare(a.number);
-    } else if (sortColumn === 'Дата начала производства') {
-      //@ts-ignore
-      return sortOrder === 'asc' ? new Date(a.start_date) - new Date(b.start_date) : new Date(b.start_date) - new Date(a.start_date);
-    } else if (sortColumn === 'id материала') {
-      return sortOrder === 'asc' ? a.material.id - b.material.id : b.material.id - a.material.id;
-    } else if (sortColumn === 'Код материала') {
-      return sortOrder === 'asc' ? a.material.code.localeCompare(b.material.code) : b.material.code.localeCompare(a.material.code);
-    } else if (sortColumn === 'Название материала') {
-      return sortOrder === 'asc' ? a.material.name.localeCompare(b.material.name) : b.material.name.localeCompare(a.material.name);
-    } else if (sortColumn === 'id продукции') {
-      return sortOrder === 'asc' ? a.product.id - b.product.id : b.product.id - a.product.id;
-    } else if (sortColumn === 'Код продукции') {
-      return sortOrder === 'asc' ? a.product.code.localeCompare(b.product.code) : b.product.code.localeCompare(a.product.code);
-    } else if (sortColumn === 'Название продукции') {
-      return sortOrder === 'asc' ? a.product.name.localeCompare(b.product.name) : b.product.name.localeCompare(a.product.name);
-    } else if (sortColumn === 'Статус завершенности') {
-      //@ts-ignore
-      return sortOrder === 'asc' ? a.is_finished - b.is_finished : b.is_finished - a.is_finished;
-    }
-    else {
-      return 0;
-    }
-  });
-
-  const sortedAndSearchedPosts: WorkOrder[] = useMemo(() => {
-    return sortedWorkOrders.filter((post: WorkOrder) => post.number.toLowerCase().includes(query.toLowerCase()));
-  }, [query, sortedWorkOrders]);
-
   const fetchWorkorders = async () => {
-    const response = await axiosGetWorkOrders(TOKEN, currentPage);
+    const response = await axiosGetWorkOrders(TOKEN, currentPage, sort, search);
     if (response) {
       setWorkOrders(response.data.results);
       const totalOrders = response.data.count;
@@ -515,14 +470,59 @@ export function WorkOrders(token: tokenInterface) {
     ), node)
   }
 
+  type SortOrderType = 'asc' | 'desc';
+  const [sort, setSort] = useState('number');
+  const [sortOrder, setSortOrder] = useState<SortOrderType>('asc');
+
+  const handleClick = (data: string) => {
+    const newSortOrder: SortOrderType = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+
+    let ordering = '';
+    switch (data) {
+      case 'number':
+        ordering = newSortOrder === 'asc' ? 'number' : '-number';
+        break;
+      case 'start_date':
+        ordering = newSortOrder === 'asc' ? 'start_date' : '-start_date';
+        break;
+      case 'is_finished':
+        ordering = newSortOrder === 'asc' ? 'is_finished' : '-is_finished';
+        break;
+      default:
+        break;
+    }
+
+    setSort(ordering);
+  };
+
+  useEffect(() => {
+    fetchWorkorders();
+  }, [sort])
+
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    fetchWorkorders();
+  };
+
+  useEffect(() => {
+    setSearch(inputValue);
+  }, [inputValue]);
 
   return (
     <div>
       <div className={styles.mainTopbar}>
-        <input className={styles.input}
-          placeholder="Поиск"
-          onChange={(e) => setQuery(e.target.value)}
-        />
+
+        <form className={styles.searchForm} onSubmit={handleSubmit}>
+          <input className={styles.searchInput} placeholder="Поиск" type="text" value={inputValue} onChange={handleInputChange} />
+          <button className={styles.button} type="submit">Отправить</button>
+        </form>
 
         <button className={[styles.button, styles.white].join(' ')} onClick={() => {
           setIsModalOpened(true)
@@ -532,22 +532,25 @@ export function WorkOrders(token: tokenInterface) {
       <table className={styles.table}>
         <thead className={styles.thead}>
           <tr>
-            <th onClick={() => handleSort('id')}>id</th>
-            <th onClick={() => handleSort('Номер наряда')}>Номер наряда</th>
-            <th onClick={() => handleSort('Дата начала производства')}>Дата начала производства</th>
-            <th onClick={() => handleSort('id материала')}>id материала</th>
-            <th onClick={() => handleSort('Код материала')}>Код материала</th>
-            <th onClick={() => handleSort('Название материала')}>Название материала</th>
-            <th onClick={() => handleSort('id продукции')}>id продукции</th>
-            <th onClick={() => handleSort('Код продукции')}>Код продукции</th>
-            <th onClick={() => handleSort('Название продукции')}>Название продукции</th>
-            <th onClick={() => handleSort('Статус завершенности')}>Статус завершенности</th>
+            <th>id</th>
+            <th className={styles.sort} onClick={() => {
+
+              handleClick('number');
+            }}>Номер наряда</th>
+            <th className={styles.sort} onClick={() => handleClick('start_date')}>Дата начала производства</th>
+            <th>id материала</th>
+            <th>Код материала</th>
+            <th>Название материала</th>
+            <th>id продукции</th>
+            <th>Код продукции</th>
+            <th>Название продукции</th>
+            <th className={styles.sort} onClick={() => handleClick('is_finished')}>Статус завершенности</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {sortedAndSearchedPosts
-            ? sortedAndSearchedPosts.map((workOrder) => (
+          {workOrders
+            ? workOrders.map((workOrder) => (
               <tr key={workOrder.id}>
                 <td>{workOrder.id}</td>
                 <td>{workOrder.number}</td>

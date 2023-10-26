@@ -88,6 +88,21 @@ td {
 }
 
 th {
-    cursor: pointer;
     user-select: none;
+}
+
+.sort {
+    cursor: pointer;
+    color: #948fce;
+}
+
+.searchForm {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 330px;
+}
+
+.searchInput {
+    padding: 5px 15px;
 }

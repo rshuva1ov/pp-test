@@ -2,9 +2,9 @@ import axios from "axios";
 import { tokenInterface } from "../Components/Main";
 
 
-export async function axiosGetWorkOrders(token: string | null, page: number) {
+export async function axiosGetWorkOrders(token: string | null, page: number, sort: string, search: string) {
   try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/v1/workorders/?page=${page}`, {
+    const response = await axios.get(`http://127.0.0.1:8000/api/v1/workorders/?ordering=${sort}&search=${search}&page=${page}`, {
       headers: {
         Authorization: `Token ${token}`
       }
