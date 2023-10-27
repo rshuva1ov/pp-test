@@ -79,6 +79,26 @@ export function WorkOrders(token: tokenInterface) {
       is_finished: false
     });
 
+    const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
+    const [materials, setMaterials] = useState<NomenclatureInterface[]>([]);
+    const [products, setProducts] = useState<NomenclatureInterface[]>([]);
+
+    const fetchNomenclature = async () => {
+      const response = await axiosGetNomenclature(TOKEN);;
+      if (response) {
+        setNomenclature(response.data.results);
+      }
+    };
+
+    useEffect(() => {
+      fetchNomenclature()
+    }, []);
+
+    useEffect(() => {
+      setMaterials(nomenclature);
+      setProducts(nomenclature);
+    }, [nomenclature]);
+
     const filterNomenclature = (codeOrName: string) => {
       const filteredMaterials = nomenclature.filter(n => n.code.includes(codeOrName) || n.name.includes(codeOrName));
       setMaterials(filteredMaterials);
@@ -157,10 +177,10 @@ export function WorkOrders(token: tokenInterface) {
           >
             <option value="">Выберите продукцию</option>
             {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
           </select>
           <input className={styles.input}
             type="date"
