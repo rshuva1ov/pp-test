@@ -18,6 +18,10 @@ export function WorkOrders(token: tokenInterface) {
   const [totalPages, setTotalPages] = useState(0);
   const [search, setSearch] = useState('');
   const limit = 10;
+  const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
+  const [materials, setMaterials] = useState<NomenclatureInterface[]>([]);
+  const [products, setProducts] = useState<NomenclatureInterface[]>([]);
+
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -36,9 +40,26 @@ export function WorkOrders(token: tokenInterface) {
     }
   };
 
+  const fetchNomenclature = async () => {
+    const response = await axiosGetNomenclature(TOKEN);;
+    if (response) {
+      setNomenclature(response.data.results);
+    }
+  };
+
   useEffect(() => {
     fetchWorkorders()
   }, [currentPage]);
+
+
+  useEffect(() => {
+    fetchNomenclature()
+  }, []);
+
+  useEffect(() => {
+    setMaterials(nomenclature);
+    setProducts(nomenclature);
+  }, [nomenclature]);
 
   let pagesArray: number[] = [];
 
@@ -50,17 +71,6 @@ export function WorkOrders(token: tokenInterface) {
 
     const TOKEN = token['token'];
 
-    const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
-    const [materials, setMaterials] = useState<NomenclatureInterface[]>([]);
-    const [products, setProducts] = useState<NomenclatureInterface[]>([]);
-
-    const fetchNomenclature = async () => {
-      const response = await axiosGetNomenclature(TOKEN);;
-      if (response) {
-        setNomenclature(response.data.results);
-      }
-    };
-
     const [newWorkOrder, setNewWorkOrder] = useState<newWorkOrderInterface>({
       number: '',
       start_date: '',
@@ -68,15 +78,6 @@ export function WorkOrders(token: tokenInterface) {
       product: '',
       is_finished: false
     });
-
-    useEffect(() => {
-      fetchNomenclature()
-    }, []);
-
-    useEffect(() => {
-      setMaterials(nomenclature);
-      setProducts(nomenclature);
-    }, [nomenclature]);
 
     const filterNomenclature = (codeOrName: string) => {
       const filteredMaterials = nomenclature.filter(n => n.code.includes(codeOrName) || n.name.includes(codeOrName));
@@ -141,13 +142,11 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value="">Выберите материал</option>
-            {materials
-              ? materials.map((material) => (
-                <option key={material.id} value={material.id}>
-                  {material.name}
-                </option>
-              ))
-              : <option></option>}
+            {materials.map((material) => (
+              <option key={material.id} value={material.id}>
+                {material.name}
+              </option>
+            ))}
           </select>
 
           <select className={styles.input}
@@ -157,13 +156,11 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value="">Выберите продукцию</option>
-            {products
-              ? products.map((product) => (
+            {products.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name}
                 </option>
-              ))
-              : <option></option>}
+              ))}
           </select>
           <input className={styles.input}
             type="date"
@@ -197,10 +194,6 @@ export function WorkOrders(token: tokenInterface) {
   });
 
   const WorkOrdersEditForm = (props: WorkOrdersFormInterface) => {
-    const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
-    const [materials, setMaterials] = useState<NomenclatureInterface[]>([]);
-    const [products, setProducts] = useState<NomenclatureInterface[]>([]);
-
     const node = document.querySelector('#modal-edit-form_root');
     if (!node) return null;
 
@@ -216,23 +209,7 @@ export function WorkOrders(token: tokenInterface) {
       return () => {
         document.removeEventListener('click', handleClick);
       }
-    }, [])
-
-    const fetchNomenclature = async () => {
-      const response = await axiosGetNomenclature(TOKEN);;
-      if (response) {
-        setNomenclature(response.data.results);
-      }
-    };
-
-    useEffect(() => {
-      fetchNomenclature();
     }, []);
-
-    useEffect(() => {
-      setMaterials(nomenclature);
-      setProducts(nomenclature);
-    }, [nomenclature]);
 
     const [changedWorkOrderInfo, setChangedWorkOrderInfo] = useState<changeWorkOrderInterface>(workOrderIdInfo);
 
@@ -417,13 +394,11 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value={changedWorkOrderInfo.material.id}>{changedWorkOrderInfo.material.name}</option>
-            {materials
-              ? materials.map((material) => (
-                <option key={material.id} value={material.id}>
-                  {material.name}
-                </option>
-              ))
-              : <option></option>}
+            {materials.map((material) => (
+              <option key={material.id} value={material.id}>
+                {material.name}
+              </option>
+            ))}
           </select>
 
           <span>Название продукции</span>
@@ -435,13 +410,11 @@ export function WorkOrders(token: tokenInterface) {
             }}
           >
             <option value={changedWorkOrderInfo.product.id}>{changedWorkOrderInfo.product.name}</option>
-            {products
-              ? products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))
-              : <option></option>}
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
           </select>
 
 
