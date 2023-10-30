@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { axiosNewProducedProducts } from '../../API/newProducedProductsAPI ';
 import { axiosPostWorkOrder } from '../../API/newWorkOrderAPI';
@@ -22,6 +22,20 @@ export function WorkOrders(token: tokenInterface) {
   const [materials, setMaterials] = useState<NomenclatureInterface[]>([]);
   const [products, setProducts] = useState<NomenclatureInterface[]>([]);
 
+  const fetchNomenclature = async () => {
+    const response = await axiosGetNomenclature(TOKEN);;
+    if (response) {
+      setNomenclature(response.data.results);
+    }
+  };
+
+  useEffect(() => {
+    fetchNomenclature();
+  }, [])
+
+  useEffect(() => {
+    fetchWorkOrders();
+  }, [currentPage]);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -31,7 +45,7 @@ export function WorkOrders(token: tokenInterface) {
     return Math.ceil(totalOrders / limit);
   };
 
-  const fetchWorkorders = async () => {
+  const fetchWorkOrders = async () => {
     const response = await axiosGetWorkOrders(TOKEN, currentPage, sort, search);
     if (response) {
       setWorkOrders(response.data.results);
@@ -40,36 +54,26 @@ export function WorkOrders(token: tokenInterface) {
     }
   };
 
-  const fetchNomenclature = async () => {
-    const response = await axiosGetNomenclature(TOKEN);;
-    if (response) {
-      setNomenclature(response.data.results);
-    }
-  };
+  let pagesArray: number[] = [];
 
-  useEffect(() => {
-    fetchWorkorders()
-  }, [currentPage]);
-
-
-  useEffect(() => {
-    fetchNomenclature()
-  }, []);
+  const [isModalOpened, setIsModalOpened] = useState(false);
 
   useEffect(() => {
     setMaterials(nomenclature);
     setProducts(nomenclature);
-  }, [nomenclature]);
-
-  let pagesArray: number[] = [];
-
-  const [isModalOpened, setIsModalOpened] = useState(false);
+  }, [])
 
   const WorkOrdersForm = (props: WorkOrdersFormInterface) => {
     const node = document.querySelector('#modal-form_root');
     if (!node) return null;
 
-    const TOKEN = token['token'];
+    const [formMaterials, setFormMaterials] = useState<NomenclatureInterface[]>([]);
+    const [formProducts, setFormProducts] = useState<NomenclatureInterface[]>([]);
+
+    useEffect(() => {
+      setFormMaterials(nomenclature);
+      setFormProducts(nomenclature);
+    }, [])
 
     const [newWorkOrder, setNewWorkOrder] = useState<newWorkOrderInterface>({
       number: '',
@@ -79,30 +83,10 @@ export function WorkOrders(token: tokenInterface) {
       is_finished: false
     });
 
-    const [nomenclature, setNomenclature] = useState<NomenclatureInterface[]>([]);
-    const [materials, setMaterials] = useState<NomenclatureInterface[]>([]);
-    const [products, setProducts] = useState<NomenclatureInterface[]>([]);
-
-    const fetchNomenclature = async () => {
-      const response = await axiosGetNomenclature(TOKEN);;
-      if (response) {
-        setNomenclature(response.data.results);
-      }
-    };
-
-    useEffect(() => {
-      fetchNomenclature()
-    }, []);
-
-    useEffect(() => {
-      setMaterials(nomenclature);
-      setProducts(nomenclature);
-    }, [nomenclature]);
-
     const filterNomenclature = (codeOrName: string) => {
       const filteredMaterials = nomenclature.filter(n => n.code.includes(codeOrName) || n.name.includes(codeOrName));
-      setMaterials(filteredMaterials);
-      setProducts(filteredMaterials);
+      setFormMaterials(filteredMaterials);
+      setFormProducts(filteredMaterials);
     };
 
     const createWorkOrder = async () => {
@@ -114,7 +98,7 @@ export function WorkOrders(token: tokenInterface) {
       }
       const response = await axiosPostWorkOrder(newWorkOrder, TOKEN);
       if (response?.statusText == 'Created') {
-        fetchWorkorders();
+        fetchWorkOrders();
         setNewWorkOrder({
           number: '',
           start_date: '',
@@ -162,11 +146,13 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value="">Выберите материал</option>
-            {materials.map((material) => (
-              <option key={material.id} value={material.id}>
-                {material.name}
-              </option>
-            ))}
+            {formMaterials
+              ? formMaterials.map((material) => (
+                <option key={material.id} value={material.id}>
+                  {material.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
 
           <select className={styles.input}
@@ -176,11 +162,13 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value="">Выберите продукцию</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
+            {formProducts
+              ? formProducts.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
           <input className={styles.input}
             type="date"
@@ -220,6 +208,11 @@ export function WorkOrders(token: tokenInterface) {
     const editRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+      setMaterials(nomenclature);
+      setProducts(nomenclature);
+    }, [])
+
+    useEffect(() => {
       function handleClick(event: MouseEvent) {
         if (event.target instanceof Node && !editRef.current?.contains(event.target) && !productRef.current?.contains(event.target)) {
           props.onClose?.();
@@ -245,7 +238,7 @@ export function WorkOrders(token: tokenInterface) {
         if (confirmation) {
           const response = await axiosPutWorkOrderWithId(changedWorkOrderInfo, TOKEN, changedWorkOrderInfo.id);
           if (response) {
-            fetchWorkorders();
+            fetchWorkOrders();
             props.onClose?.();
           }
         } else return;
@@ -301,7 +294,6 @@ export function WorkOrders(token: tokenInterface) {
           }
         } else return;
       }
-
 
       useEffect(() => {
         fetchProducedProducts();
@@ -414,11 +406,13 @@ export function WorkOrders(token: tokenInterface) {
             }
           >
             <option value={changedWorkOrderInfo.material.id}>{changedWorkOrderInfo.material.name}</option>
-            {materials.map((material) => (
-              <option key={material.id} value={material.id}>
-                {material.name}
-              </option>
-            ))}
+            {materials
+              ? materials.map((material) => (
+                <option key={material.id} value={material.id}>
+                  {material.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
 
           <span>Название продукции</span>
@@ -430,11 +424,13 @@ export function WorkOrders(token: tokenInterface) {
             }}
           >
             <option value={changedWorkOrderInfo.product.id}>{changedWorkOrderInfo.product.name}</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
+            {products
+              ? products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))
+              : <option></option>}
           </select>
 
 
@@ -489,7 +485,7 @@ export function WorkOrders(token: tokenInterface) {
   };
 
   useEffect(() => {
-    fetchWorkorders();
+    fetchWorkOrders();
   }, [sort])
 
   const [inputValue, setInputValue] = useState('');
@@ -500,7 +496,7 @@ export function WorkOrders(token: tokenInterface) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    fetchWorkorders();
+    fetchWorkOrders();
   };
 
   useEffect(() => {
@@ -509,7 +505,7 @@ export function WorkOrders(token: tokenInterface) {
 
   return (
     <div>
-      <div className={styles.mainTopbar}>
+      <div className={styles.mainTopBar}>
 
         <form className={styles.searchForm} onSubmit={handleSubmit}>
           <input className={styles.searchInput} placeholder="Поиск" type="text" value={inputValue} onChange={handleInputChange} />

@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build:prod
 
 # Создание финального контейнера
-FROM node:14.17.0
+FROM node:16.13.1
 
 # Установка рабочей директории внутри контейнера
 WORKDIR /app
